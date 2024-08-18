@@ -25,9 +25,10 @@ namespace Filing_API.Controllers
 
         // GET api/<ContactController>/5
         [HttpGet("{id}")]
-        public IActionResult Get(int id)
+        public IActionResult Get(Guid id)
         {
-            ContactT? res = _context.ContactTs.First(ct => ct.Id.Equals(id));
+                    // .Find(id) is null-t ad ha nem létezik
+            ContactT? res = _context.ContactTs.FirstOrDefault(ct => ct.Id.Equals(id));
 
             return res==null?NotFound() : Ok(res);
         }
@@ -47,7 +48,7 @@ namespace Filing_API.Controllers
         public IActionResult Put(Guid id, [FromBody] ContactT updateContact)
         {
             if (_context.ContactTs.Find(id) == null)
-                return BadRequest();
+                return NotFound();
             _context.ContactTs.Update(updateContact);
             _context.SaveChanges();
 
@@ -56,8 +57,14 @@ namespace Filing_API.Controllers
 
         // DELETE api/<ContactController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public IActionResult Delete(Guid id)
         {
+            // TODO: delete referencing foreign records first
+
+            _context.ContactTs.Remove(new ContactT { Id = id});
+            _context.SaveChanges();
+
+            return NoContent();
         }
     }
 }
